@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/bootstrap-5.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/chart/chart.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function clearCanvas() {
+
+                var plot = $('#plot')[0].plot
+                if (plot) {
+                    plot.destroy()
+                }
+            }
+            function quadraticEquation(a, b, c) {
+                var D = Math.pow(b, 2) - 4 * a * c
+                if (D < 0) {
+                    console.log(D)
+                    return {
+                        'error': true,
+                    }
+                }
+                D = Math.sqrt(D)
+                return {
+                    '_1': (-b + D) / (2 * a),
+                    '_2': (-b - D) / (2 * a),
+                    'error': false,
+                }
+            }
+
+            function GetCoords(id) {
+                var cs = String($(id).val()).split(",")
+                var res = []
+                for (var i = 0; i < cs.length; i++) {
+                    var range = cs[i].split("|")
+                    res.push({ 'start': parseInt(range[0]), 'end': parseInt(range[1]) })
+                }
+                return res
+            }
+
+            function calcA() {
+                return 100
+            }
+
+            function calcB(x) {
+                return -200 * x
+            }
+
+            function calcC(x, z) {
+                return 101 * Math.pow(x, 2) + 1 - 2 * x - z
+            }
+
+            function calcCoords(draw) {
+                // 100*(y - x)^2 + (1 - x)^2
+                // 100y^2 - 200xy + 100x^2 + 1 - 2x + x^2
+                // a = 100
+                // b = -(200*x)
+                // c = (100x^2 + 1 - 2x + x^2 - z)
+                // D = b^2 - 4ac
+                // y1 = (-b + D)/2a
+                // y2 = (-b - D)/2a
+                var calc = { withY1: [], withY2: [] }
+                var xStep = 0.5
+                var zStep = 2.0
+                var withY1 = [], withY2 = []
+                console.log(draw)
+                for (var z = draw.zs[0].start; z < draw.zs[0].end; z += zStep) {
+                    for (var x = draw.xs[0].start; x < draw.xs[0].end; x += xStep) {
+                        var a = calcA()
+                        var b = calcB(x)
+                        var c = calcC(x, z)
+                        y = quadraticEquation(a, b, c)
+                        if (y.error) {
+                            console.log('a =', a, 'b =', b, 'c =', c)
+                            console.log('дискриминант меньше нуля')
+                            continue
+                        }
+                        calc.withY1.push({ 'x': x, 'y': y._1 })
+                        calc.withY2.push({ 'x': x, 'y': y._2 })
+                    }
+                }
+                return calc
+            }
+
+            function drawRosenbrock2D(draw) {
+                var coords = calcCoords(draw)
+                console.log(JSON.stringify(coords))
+                var data1 = []
+                var labels = []
+                var data2 = []
+                for (var i = 0; i < coords.withY1.length; i++) {
+                    data1.push({
+                        x: coords.withY1[i].x,
+                        y: coords.withY1[i].y,
+                    })
+                    labels.push(coords.withY1[i].x)
+                    data2.push({
+                        x: coords.withY2[i].x,
+                        y: coords.withY2[i].y,
+                    })
+                }
+                if (data1.length == 0) {
+                    alert('нет данных')
+                }
+                var plot = new Chart($('#plot')[0], {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Функция Розенброка Y1',
+                            fill: false,
+                            borderColor: '#0b5ed9',
+                            data: data1,
+                            cubicInterpolationMode: 'monotone'
+                        },
+                        {
+                            label: 'Функция Розенброка Y2',
+                            fill: false,
+                            borderColor: '#dc3545',
+                            data: data2,
+                            cubicInterpolationMode: 'monotone'
+                        }],
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'X'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Y'
+                                }
+                            }
+                        }
+                    }
+                })
+                plot.update()
+                $('#plot')[0].plot = plot
+            }
+
+            $('#draw').click(function () {
+                clearCanvas()
+                var draw = {
+                    'zs': GetCoords('#z'),
+                    'xs': GetCoords('#x'),
+                }
+
+                // находим y
+                // var a = calcA()
+                // var b = calcB(draw.xs[0].start)
+                // var c = calcC(draw.xs[0].start, draw.zs[0].start)
+
+                // res = QuadraticEquation(a, b, c)
+                drawRosenbrock2D(draw)
+                // calcRosenbrock2D(draw)
+                // alert(JSON.stringify(res))
+            })
+            $("form").submit(function (e) {
+                e.preventDefault(e);
+            });
+        })
+    </script>
+    <title>Функция Розенброка 2D (линии уровня)</title>
+</head>
+
+<body>
+    <div class="container">
+        <p class="h1">Функция Розенброка 2D f(x, y) = 100*(y - x)^2 + (1 - x)^2</p>
+        <form>
+            <div class="row">
+                <div class="col">
+                    <input id="z" type="text" class="form-control" placeholder="Введите f(x, y), например, 5-100">
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input id="x" type="text" class="form-control" placeholder="Введите x, например, 5-100">
+                </div>
+            </div>
+            <button id="draw" class="btn btn-primary">Нарисовать</button>
+        </form>
+        <div class="row">
+            <canvas id="plot"></canvas>
+        </div>
+    </div>
+</body>
+
+</html>
