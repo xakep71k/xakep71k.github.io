@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/bootstrap-5.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>Метод прямоугольников</title>
+    <style>
+        tbody>tr>th {
+            font-weight: normal;
+        }
+    </style>
+    <script src="/jquery/jquery-3.6.0.min.js"></script>
+    <script>
+        function input() {
+            var data = {
+                'x1': null,
+                'x2': null,
+                'step': null,
+                'error': null,
+                'equatation': null,
+            }
+            data.x1 = parseFloat($('#x1').val())
+            if (data.x1 == NaN) {
+                data.error = "неверный x1"
+                return data
+            }
+            data.x2 = parseFloat($('#x2').val())
+            if (data.x2 == NaN) {
+                data.error = "неверный x2"
+                return data
+            }
+            data.step = parseFloat($('#step').val())
+            if (data.step == NaN) {
+                data.error = "неверный шаг"
+                return data
+            }
+            data.equatation = $('#y').val()
+            return data
+        }
+        function integral_rectangle() {
+            var data = input()
+            if (data.error != null) {
+                return data.error
+            }
+
+            var h = (data.x2 - data.x1) / data.step
+            $('#rec_h').html(h)
+
+            var area = 0.0
+            var counter = 0
+            var max = 1000
+            for (let i = data.x1; i < data.x2 && counter < max; i += h) {
+                var equatation_with_values = data.equatation.replace("x", String(i))
+                var y = eval(equatation_with_values)
+                area += y * h
+                counter++
+            }
+
+            if (counter >= max) {
+                $('#rec_area').html("ОШИБКА: слишком много итеграций")
+            } else {
+                $('#rec_area').html(area)
+            }
+            return
+        }
+
+        function integral_trapezoid() {
+            var data = input()
+            if (data.error != null) {
+                return data.error
+            }
+
+            var h = (data.x2 - data.x1) / data.step
+            $('#trap_h').html(h)
+
+            var area = 0.0
+            var counter = 0
+            var max = 1000
+            var j = data.x1;
+            for (let i = data.x1 + h; i < data.x2 && counter < max; i += h) {
+                var equatation_a = data.equatation.replace("x", String(j))
+                var equatation_b = data.equatation.replace("x", String(i))
+                var ya = eval(equatation_a)
+                var yb = eval(equatation_b)
+                area += ya + yb
+                counter++
+                j = i
+            }
+            area *= h / 2
+
+            if (counter >= max) {
+                $('#trap_area').html("ОШИБКА: слишком много итеграций")
+            } else {
+                $('#trap_area').html(area)
+            }
+            return
+        }
+
+        $(document).ready(function () {
+            $('#draw').click(function () {
+                var error = integral_rectangle()
+                if (error) {
+                    alert(error)
+                    return
+                }
+                error = integral_trapezoid()
+                if (error) {
+                    alert(error)
+                    return
+                }
+            })
+            $("form").submit(function (e) {
+                e.preventDefault(e);
+            });
+        })
+    </script>
+</head>
+
+<body>
+    <div class="container" style="width: 40em;">
+        <form>
+            <div class="row">
+                <div class="col">
+                    <input id="y" type="text" class="form-control"
+                        placeholder="Введите f(x, y), в javascript синтаксисе">
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input id="x1" type="text" class="form-control" placeholder="Введите начало промежутка">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input id="x2" type="text" class="form-control" placeholder="Введите конец промежутка">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input id="step" type="text" class="form-control"
+                        placeholder="На сколько отрезков разбить промежуток">
+                </div>
+            </div>
+            <button id="draw" class="btn btn-primary">Рассчитать</button>
+        </form>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Метод прямоугольников</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Длина каждого промежутка</th>
+                    <td id="rec_h"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Площадь</th>
+                    <td id="rec_area"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Метод трапеций</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Длина каждого промежутка</th>
+                    <td id="trap_h"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Площадь</th>
+                    <td id="trap_area"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
