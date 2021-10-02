@@ -100,10 +100,10 @@
             for (let i = 1; i < data.n; i++) {
                 x += h
                 var f_xi = eval(data.equatation.replace("x", String(x)))
-                if ((x % 2) == 1) {
-                    t_chet += 4 * f_xi
+                if ((i % 2) == 1) {
+                    t_nechet += 4 * f_xi
                 } else {
-                    t_nechet += 2 * f_xi
+                    t_chet += 2 * f_xi
                 }
             }
 
@@ -131,7 +131,7 @@
                 x += h
                 var f_xi = eval(data.equatation.replace("x", String(x)))
                 t_n += 4 * f_xi
-                if ((x % 2) == 0) {
+                if ((i % 2) == 0) {
                     t_n_2 += 2 * f_xi
                 }
             }
@@ -140,7 +140,7 @@
             var fb = eval(data.equatation.replace("x", String(data.b)))
             t_n = (2 * fa + t_n + 2 * fb) * (data.b - data.a) / (3 * data.n)
             t_n_2 = (fa + t_n_2 + fb) * (data.b - data.a) / (3 * data.n)
-            var area = (4 * t_n) / 3 - t_n_2 / 3
+            var area = 4 / 3 * t_n - 1 / 3 * t_n_2
 
             $('#simp_lec_area').html(area)
             return
