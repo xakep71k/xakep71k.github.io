@@ -94,10 +94,38 @@
             var h = (data.b - data.a) / data.n
             $('#simp_h').html(h)
 
+            var t_chet = 0.0
+            var t_nechet = 0.0
+            var x = data.a
+            for (let i = 1; i < data.n; i++) {
+                x += h
+                var f_xi = eval(data.equatation.replace("x", String(x)))
+                if ((x % 2) == 1) {
+                    t_chet += 4 * f_xi
+                } else {
+                    t_nechet += 2 * f_xi
+                }
+            }
+
+            var fa = eval(data.equatation.replace("x", String(data.a)))
+            var fb = eval(data.equatation.replace("x", String(data.b)))
+            var area = (fa + t_chet + t_nechet + fb) * (h / 3)
+
+            $('#simp_area').html(area)
+            return
+        }
+
+        function integral_simpson_from_lectures() {
+            var data = input()
+            if (data.error != null) {
+                return data.error
+            }
+
+            var h = (data.b - data.a) / data.n
+            $('#simp_lec_h').html(h)
+
             var t_n = 0.0
             var t_n_2 = 0.0
-            var counter = 0
-            var max = 1000
             var x = data.a
             for (let i = 1; i < data.n; i++) {
                 x += h
@@ -112,10 +140,9 @@
             var fb = eval(data.equatation.replace("x", String(data.b)))
             t_n = (2 * fa + t_n + 2 * fb) * (data.b - data.a) / (3 * data.n)
             t_n_2 = (fa + t_n_2 + fb) * (data.b - data.a) / (3 * data.n)
+            var area = (4 * t_n) / 3 - t_n_2 / 3
 
-            var area = 3 * t_n / 4 + t_n_2 / 3
-
-            $('#simp_area').html(area)
+            $('#simp_lec_area').html(area)
             return
         }
 
@@ -132,6 +159,11 @@
                     return
                 }
                 error = integral_simpson()
+                if (error) {
+                    alert(error)
+                    return
+                }
+                error = integral_simpson_from_lectures()
                 if (error) {
                     alert(error)
                     return
@@ -214,11 +246,28 @@
             <tbody>
                 <tr>
                     <th scope="row">Длина каждого промежутка</th>
-                    <td id="simp_h">-</td>
+                    <td id="simp_h"></td>
                 </tr>
                 <tr>
                     <th scope="row">Площадь</th>
                     <td id="simp_area"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Метод Симпсона (как в лекциях)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Длина каждого промежутка</th>
+                    <td id="simp_lec_h"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Площадь</th>
+                    <td id="simp_lec_area"></td>
                 </tr>
             </tbody>
         </table>
