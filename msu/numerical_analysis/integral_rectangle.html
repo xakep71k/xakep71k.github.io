@@ -15,24 +15,24 @@
     <script>
         function input() {
             var data = {
-                'x1': null,
-                'x2': null,
-                'step': null,
+                'a': null,
+                'b': null,
+                'n': null,
                 'error': null,
                 'equatation': null,
             }
-            data.x1 = parseFloat($('#x1').val())
-            if (data.x1 == NaN) {
-                data.error = "неверный x1"
+            data.a = parseFloat($('#a').val())
+            if (data.a == NaN) {
+                data.error = "неверное значение a"
                 return data
             }
-            data.x2 = parseFloat($('#x2').val())
-            if (data.x2 == NaN) {
-                data.error = "неверный x2"
+            data.b = parseFloat($('#b').val())
+            if (data.b == NaN) {
+                data.error = "неверное значение b"
                 return data
             }
-            data.step = parseFloat($('#step').val())
-            if (data.step == NaN) {
+            data.n = parseFloat($('#n').val())
+            if (data.n == NaN) {
                 data.error = "неверный шаг"
                 return data
             }
@@ -45,24 +45,18 @@
                 return data.error
             }
 
-            var h = (data.x2 - data.x1) / data.step
+            var h = (data.b - data.a) / data.n
             $('#rec_h').html(h)
 
             var area = 0.0
-            var counter = 0
-            var max = 1000
-            for (let i = data.x1; i < data.x2 && counter < max; i += h) {
-                var equatation_with_values = data.equatation.replace("x", String(i))
-                var y = eval(equatation_with_values)
-                area += y * h
-                counter++
+            for (let i = 1; i <= data.n; i++) {
+                var ksi_i = data.a + (i - 1 / 2) * h
+                var equatation_with_values = data.equatation.replace("x", ksi_i)
+                area += eval(equatation_with_values) / data.n
             }
 
-            if (counter >= max) {
-                $('#rec_area').html("ОШИБКА: слишком много итеграций")
-            } else {
-                $('#rec_area').html(area)
-            }
+            area *= (data.b - data.a)
+            $('#rec_area').html(area)
             return
         }
 
@@ -72,29 +66,56 @@
                 return data.error
             }
 
-            var h = (data.x2 - data.x1) / data.step
+            var h = (data.b - data.a) / data.n
             $('#trap_h').html(h)
 
             var area = 0.0
+            var x = data.a
+            for (let i = 1; i < data.n; i++) {
+                x += h
+                var f_xi = eval(data.equatation.replace("x", String(x)))
+                area += f_xi
+            }
+
+            var fa = eval(data.equatation.replace("x", String(data.a)))
+            var fb = eval(data.equatation.replace("x", String(data.b)))
+            area = (fa / 2 + area + fb / 2) * h
+
+            $('#trap_area').html(area)
+            return
+        }
+
+        function integral_simpson() {
+            var data = input()
+            if (data.error != null) {
+                return data.error
+            }
+
+            var h = (data.b - data.a) / data.n
+            $('#simp_h').html(h)
+
+            var t_n = 0.0
+            var t_n_2 = 0.0
             var counter = 0
             var max = 1000
-            var j = data.x1;
-            for (let i = data.x1 + h; i < data.x2 && counter < max; i += h) {
-                var equatation_a = data.equatation.replace("x", String(j))
-                var equatation_b = data.equatation.replace("x", String(i))
-                var ya = eval(equatation_a)
-                var yb = eval(equatation_b)
-                area += ya + yb
-                counter++
-                j = i
+            var x = data.a
+            for (let i = 1; i < data.n; i++) {
+                x += h
+                var f_xi = eval(data.equatation.replace("x", String(x)))
+                t_n += 4 * f_xi
+                if ((x % 2) == 0) {
+                    t_n_2 += 2 * f_xi
+                }
             }
-            area *= h / 2
 
-            if (counter >= max) {
-                $('#trap_area').html("ОШИБКА: слишком много итеграций")
-            } else {
-                $('#trap_area').html(area)
-            }
+            var fa = eval(data.equatation.replace("x", String(data.a)))
+            var fb = eval(data.equatation.replace("x", String(data.b)))
+            t_n = (2 * fa + t_n + 2 * fb) * (data.b - data.a) / (3 * data.n)
+            t_n_2 = (fa + t_n_2 + fb) * (data.b - data.a) / (3 * data.n)
+
+            var area = 3 * t_n / 4 + t_n_2 / 3
+
+            $('#simp_area').html(area)
             return
         }
 
@@ -106,6 +127,11 @@
                     return
                 }
                 error = integral_trapezoid()
+                if (error) {
+                    alert(error)
+                    return
+                }
+                error = integral_simpson()
                 if (error) {
                     alert(error)
                     return
@@ -130,18 +156,17 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <input id="x1" type="text" class="form-control" placeholder="Введите начало промежутка">
+                    <input id="a" type="text" class="form-control" placeholder="Введите начало промежутка">
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <input id="x2" type="text" class="form-control" placeholder="Введите конец промежутка">
+                    <input id="b" type="text" class="form-control" placeholder="Введите конец промежутка">
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <input id="step" type="text" class="form-control"
-                        placeholder="На сколько отрезков разбить промежуток">
+                    <input id="n" type="text" class="form-control" placeholder="На сколько отрезков разбить промежуток">
                 </div>
             </div>
             <button id="draw" class="btn btn-primary">Рассчитать</button>
@@ -177,6 +202,23 @@
                 <tr>
                     <th scope="row">Площадь</th>
                     <td id="trap_area"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Метод Симпсона</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Длина каждого промежутка</th>
+                    <td id="simp_h">-</td>
+                </tr>
+                <tr>
+                    <th scope="row">Площадь</th>
+                    <td id="simp_area"></td>
                 </tr>
             </tbody>
         </table>
