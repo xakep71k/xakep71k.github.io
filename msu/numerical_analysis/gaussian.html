@@ -1,7 +1,182 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/bootstrap-5.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>Метод прямоугольников</title>
+    <style>
+        form {
+            width: 40em;
+        }
+
+        table {
+            margin-top: 2em;
+        }
+
+        #matrix>tr>td,
+        #matrix>tr>td>input {
+            max-width: 5em;
+        }
+    </style>
+    <script src="/jquery/jquery-3.6.0.min.js"></script>
+    <script>
+        function defaults() {
+            if ($("#matrix tr").length == 3) {
+                var matrix = [
+                    [-5.4824, 2.1742, 1.2357, -2.0735],
+                    [-4.7483, 6.1365, 3.4873, 4.8755],
+                    [-4.6921, -6.2163, 6.0696, -4.8388],
+                ]
+                $("#matrix tr").each(function (i) {
+                    $(this).find('td').each(function (j) {
+                        $(this).find('input').val(matrix[i][j])
+                    })
+                })
+            }
+        }
+
+        function checkMatrix() {
+            var wrong = false
+            $("#matrix tr").each(function (i) {
+                $(this).find('td').each(function (i) {
+                    if (wrong) {
+                        return
+                    }
+                    var val = parseFloat($(this).find('input').val())
+                    if (Number.isNaN(val)) {
+                        wrong = true
+                        alert('неверные значения в матрице')
+                        return
+                    }
+                })
+            })
+            return !wrong
+        }
+
+        function solving() {
+            var rootsNum = $('#matrix tr').length
+            var matrix = []
+            $("#matrix tr").each(function (i) {
+                var row = []
+                $(this).find('td').each(function (i) {
+                    var val = parseFloat($(this).find('input').val())
+                    row.push(val)
+                })
+                matrix.push(row)
+            });
+
+            for (let i = 0; i < matrix.length; i++) {
+                var j = i
+                for (; j < matrix.length; j++) {
+                    if (matrix[j][i] != 0) {
+                        break
+                    }
+                }
+                var tmp = matrix[i]
+                matrix[i] = matrix[j]
+                matrix[j] = tmp
+
+                var div = matrix[i][i]
+                for (let m = i + 1; m < matrix.length; m++) {
+                    var first = matrix[m][i]
+                    for (let k = i; k < matrix[m].length; k++) {
+                        matrix[m][k] = matrix[m][k] - first * matrix[i][k] / div
+                    }
+                }
+
+                for (let k = i; k < matrix[i].length; k++) {
+                    matrix[i][k] /= div
+                }
+            }
+
+            var lastIndex = matrix.length
+            for (let i = matrix.length - 2; i >= 0; i--) {
+                var m = i + 1
+                for (let j = i + 1; j < matrix.length; j++) {
+                    matrix[i][lastIndex] += matrix[i][j] * -1 * matrix[m][lastIndex]
+                    matrix[i][j] = 0
+                    m++
+                }
+            }
+
+            $('#root td').each(function (i) {
+                $(this).html(' = ' + matrix[i][matrix.length])
+            })
+        }
+
+        $(document).ready(function () {
+            $('#create-matrix').click(function () {
+                var rowsNum = parseInt($('#rows').val(), 10)
+                if (rowsNum == NaN || rowsNum < 1 || rowsNum > 12) {
+                    alert('указано неверное значения для строк матрицы, должно [1; 12]')
+                    return
+                }
+
+                var columnsNum = rowsNum + 1
+                var columnsHTML = '';
+                for (let i = 0; i < columnsNum - 1; i++) {
+                    columnsHTML += '<td><input type="text" style="text-align: center;"></td>'
+                }
+                columnsHTML += '<td><input type="text" style="text-align: center; background-color: #cbcfcb;"></td>'
+                columnsHTML = '<tr>' + columnsHTML + '</tr>'
+
+                var rowsHTML = '';
+                for (let i = 0; i < rowsNum; i++) {
+                    rowsHTML += columnsHTML
+                }
+
+                $('#matrix').html(rowsHTML)
+                $('#solve').show()
+
+                var rootHTML = ''
+                for (let i = 0; i < rowsNum; i++) {
+                    rootHTML += '<tr><th scope="row">x<sub>' + (i + 1) + '</sub></th><td id="x' + (i + 1) + '"> = ?</td></tr>'
+                }
+
+                $('#root').html(rootHTML)
+                defaults()
+            })
+
+            $('#solve').click(function () {
+                if (checkMatrix()) {
+                    solving()
+                }
+            })
+
+            $("form").submit(function (e) {
+                e.preventDefault(e);
+            });
+        })
+    </script>
+</head>
+
 <body>
+    <div class="container">
+        <center>
+            <form>
+                <div class="row">
+                    <div class="col">
+                        <input id="rows" type="text" class="form-control" style="text-align: center;"
+                            placeholder="Количество строк матрицы">
+                    </div>
+                </div>
+                <center>
+                    <button id="create-matrix" class="btn btn-primary">Создать матрицу</button>
+                </center>
+            </form>
+            <table>
+                <tbody id="matrix">
+                </tbody>
+            </table>
+            <button id="solve" class="btn btn-primary" style="display: none; margin-top: 1em;">Решить уравнение</button>
+            <table>
+                <tbody id="root">
+                </tbody>
+            </table>
+        </center>
+    </div>
 </body>
 
 </html>
