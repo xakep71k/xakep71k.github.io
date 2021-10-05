@@ -95,7 +95,7 @@
             for (let i = matrix.length - 2; i >= 0; i--) {
                 var m = i + 1
                 for (let j = i + 1; j < matrix.length; j++) {
-                    matrix[i][lastIndex] += matrix[i][j] * -1 * matrix[m][lastIndex]
+                    matrix[i][lastIndex] += -matrix[i][j] * matrix[m][lastIndex]
                     matrix[i][j] = 0
                     m++
                 }
