@@ -115,36 +115,36 @@
             return
         }
 
-        function integral_simpson_from_lectures() {
-            var data = input()
-            if (data.error != null) {
-                return data.error
-            }
+        // function integral_simpson() {
+        //     var data = input()
+        //     if (data.error != null) {
+        //         return data.error
+        //     }
 
-            var h = (data.b - data.a) / data.n
-            $('#simp_lec_h').html(h)
+        //     var h = (data.b - data.a) / data.n
+        //     $('#simp_h').html(h)
 
-            var t_n = 0.0
-            var t_n_2 = 0.0
-            var x = data.a
-            for (let i = 1; i < data.n; i++) {
-                x += h
-                var f_xi = eval(data.equatation.replace("x", String(x)))
-                t_n += 4 * f_xi
-                if ((i % 2) == 0) {
-                    t_n_2 += 2 * f_xi
-                }
-            }
+        //     var t_n = 0.0
+        //     var t_n_2 = 0.0
+        //     var x = data.a
+        //     for (let i = 1; i < data.n; i++) {
+        //         x += h
+        //         var f_xi = eval(data.equatation.replace("x", String(x)))
+        //         t_n += 4 * f_xi
+        //         if ((i % 2) == 0) {
+        //             t_n_2 += 2 * f_xi
+        //         }
+        //     }
 
-            var fa = eval(data.equatation.replace("x", String(data.a)))
-            var fb = eval(data.equatation.replace("x", String(data.b)))
-            t_n = (2 * fa + t_n + 2 * fb) * (data.b - data.a) / (3 * data.n)
-            t_n_2 = (fa + t_n_2 + fb) * (data.b - data.a) / (3 * data.n)
-            var area = 4 / 3 * t_n - 1 / 3 * t_n_2
+        //     var fa = eval(data.equatation.replace("x", String(data.a)))
+        //     var fb = eval(data.equatation.replace("x", String(data.b)))
+        //     t_n = (2 * fa + t_n + 2 * fb) * (data.b - data.a) / (3 * data.n)
+        //     t_n_2 = (fa + t_n_2 + fb) * (data.b - data.a) / (3 * data.n)
+        //     var area = 4 / 3 * t_n - 1 / 3 * t_n_2
 
-            $('#simp_lec_area').html(area)
-            return
-        }
+        //     $('#simp_area').html(area)
+        //     return
+        // }
 
         $(document).ready(function () {
             $('#draw').click(function () {
@@ -163,11 +163,11 @@
                     alert(error)
                     return
                 }
-                error = integral_simpson_from_lectures()
-                if (error) {
-                    alert(error)
-                    return
-                }
+                // error = integral_simpson_from_lectures()
+                // if (error) {
+                //     alert(error)
+                //     return
+                // }
             })
             $("form").submit(function (e) {
                 e.preventDefault(e);
@@ -240,7 +240,7 @@
         <table class="table">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col">Метод Симпсона (как на матанализе проходили)</th>
+                    <th scope="col">Метод Симпсона</th>
                 </tr>
             </thead>
             <tbody>
@@ -254,7 +254,7 @@
                 </tr>
             </tbody>
         </table>
-        <table class="table">
+        <!-- <table class="table">
             <thead class="thead-light">
                 <tr>
                     <th scope="col">Метод Симпсона (как в лекциях)</th>
@@ -270,7 +270,7 @@
                     <td id="simp_lec_area"></td>
                 </tr>
             </tbody>
-        </table>
+        </table> -->
     </div>
 </body>
 
